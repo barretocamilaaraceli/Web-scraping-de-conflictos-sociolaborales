@@ -27,11 +27,11 @@ El proceso se organiza en tres etapas:
    - Identifica el *territorio* (Santa Fe o Entre Ríos) y calcula un *nivel de conflicto* (0–1).
 
 2. **Depuración de duplicados (`deduplicador.py`)**
-   - Combina los CSV de ambas provincias y elimina noticias repetidas o muy similares usando comparación textual (RapidFuzz).
+   - Combina los CSV de ambas provincias y elimina noticias repetidas o muy similares usando comparación textual (*RapidFuzz*).
    - Devuelve una base limpia (`conflictos_limpios.csv`).
 
 3. **Clasificación temática (`clasificador_conflictos.py`)**
-   - Clasifica los conflictos por sector (docente, salud, transporte, estatal, etc.).
+   - Clasifica los conflictos por *sector* (docente, salud, transporte, estatal, etc.).
    - Permite incorporar reglas o modelos NLP más complejos en futuras versiones.
 
 ---
@@ -49,6 +49,7 @@ El proceso se organiza en tres etapas:
 ├── 🧹 deduplicador.py # Script de limpieza de duplicados
 └── 🧾 README.md # Documentación del proyecto
 
+
 ---
 
 # ⚙️ Instalación y configuración
@@ -63,11 +64,13 @@ source venv/bin/activate      # Linux/macOS
 venv\Scripts\activate         # Windows
 
 ## **3. Instalar dependencias**
-pip install requests beautifulsoup4 feedparser pandas rapidfuzz
+*pip install requests beautifulsoup4 feedparser pandas rapidfuzz*
 
 ----
-**🚀 Ejecución paso a paso**
-### 1️⃣ Relevar noticias
+
+# **🚀 Ejecución paso a paso**
+
+## 1️⃣ Relevar noticias
 python scraping_er_sf.py
 
 📥 Este script:
@@ -76,55 +79,63 @@ Filtra por coocurrencias (actores + acciones + reclamos).
 Detecta provincia o localidad.
 Calcula nivel de conflicto (nivel_conflicto entre 0 y 1).
 
-Salidas:
+*Salidas:*
 data/historico_santafe.csv
 data/historico_entreríos.csv
 data/historico_nacionales.csv
 
-### 2️⃣ Eliminar duplicados
+
+## 2️⃣ Eliminar duplicados
 python deduplicador.py
 
 🧹 Este script:
 Combina los CSV anteriores.
 Elimina duplicados exactos y por similitud (>90%).
-Devuelve una base consolidada y limpia:
+
+*Devuelve una base consolidada y limpia:*
 data/conflictos_limpios.csv
 
-### **3️⃣ Clasificar los conflictos**
+
+## **3️⃣ Clasificar los conflictos**
 python clasificador_conflictos.py
 
-🧠 Este script:
+*🧠 Este script:*
 Clasifica los conflictos por tipo de sector laboral.
 Agrega las columnas:
-categoria_conflicto
-fecha_clasificacion
-subnivel_conflicto (opcional: bajo / medio / alto)
+- categoria_conflicto
+- fecha_clasificacion
+- subnivel_conflicto (opcional: bajo / medio / alto)
 
-Salida:
+*Salida:*
 data/conflictos_clasificados.csv
 
+---
+
 ## **📊 Campos del dataset final**
-Campo	Descripción
-fecha_relevamiento	Fecha del scraping
-medio	Fuente periodística
-titulo	Título original
-link	URL del artículo
-texto	Cuerpo de la noticia
-territorio	Santa Fe / Entre Ríos
-acciones_detectadas	Palabras clave de acción
-actores_detectados	Palabras clave de actor
-reclamos_detectados	Palabras clave de reclamo
-verbos_detectados	Verbos asociados a conflictos
-repertorios_detectados	Formas de acción colectiva
+**Campo**	               **Descripción**
+fecha_relevamiento	      Fecha del scraping
+medio	                     Fuente periodística
+titulo	                  Título original
+link	                     URL del artículo
+texto	                     Cuerpo de la noticia
+territorio	               Santa Fe / Entre Ríos
+acciones_detectadas	      Palabras clave de acción
+actores_detectados	      Palabras clave de actor
+reclamos_detectados	      Palabras clave de reclamo
+verbos_detectados	         Verbos asociados a conflictos
+repertorios_detectados	   Formas de acción colectiva
 instituciones_detectadas	Menciones a organismos
-nivel_conflicto	Valor 0–1 según coocurrencias
-coocurrencia	Estructura A:B:C detectada
-categoria_conflicto	Clasificación temática (docente, salud, etc.)
-subnivel_conflicto	Bajo / Medio / Alto (según puntaje)
-longitud_texto	Longitud del texto analizado
+nivel_conflicto	         Valor 0–1 según coocurrencias
+coocurrencia	            Estructura A:B:C detectada
+categoria_conflicto       	Clasificación temática (docente, salud, etc.)
+subnivel_conflicto	      Bajo / Medio / Alto (según puntaje)
+longitud_texto	            Longitud del texto analizado
+
+---
 
 ## **🗞️ Medios relevados**
-###🟦 Entre Ríos
+
+*🟦 Entre Ríos*
 Análisis Digital
 El Miércoles Digital
 El Heraldo de Concordia (RSS)
@@ -133,7 +144,7 @@ La Calle (Concepción del Uruguay)
 AIM Digital
 APF Digital
 
-###🟥 Santa Fe
+*🟥 Santa Fe*
 Aire de Santa Fe
 Santa Fe Noticias
 Pausa (Santa Fe)
@@ -141,28 +152,33 @@ Diario Castellanos (Rafaela)
 Esperanza Día x Día
 Reconquista Hoy
 
-###⚪ Nacionales (con cobertura regional)
+*⚪ Nacionales (con cobertura regional)*
 InfoGremiales
 La Izquierda Diario (Entre Ríos)
 La Izquierda Diario (Santa Fe)
 
-##**🧩 Flujo de trabajo completo**
-scraping_er_sf.py      → Recolección y filtrado semántico
-deduplicador.py        → Limpieza de duplicados
-clasificador_conflictos.py → Clasificación temática por sector
+---
 
-Resultado final:
+# **🧩 Flujo de trabajo completo**
+*scraping_er_sf.py*           → Recolección y filtrado semántico
+*deduplicador.py*             → Limpieza de duplicados
+*clasificador_conflictos.py*  → Clasificación temática por sector
+
+**Resultado final:**
 data/conflictos_clasificados.csv
 
-###**🧰 Posibles mejoras futuras**
+---
+
+**🧰 Posibles mejoras futuras**
 Incorporar embeddings o modelos de clasificación supervisada (BERT, DistilBERT, SBERT).
 Analizar frecuencia temporal y territorial de conflictos (dashboards).
 Detección automática de gremios y empresas involucradas.
 Enlace con datasets comparativos: Mass Mobilization (Harvard) o ACEP (Nieto, UNMdP).
 Agregar capa de visualización (Streamlit / Power BI).
 
-##📖 **Créditos**
-Autor: Camila Barreto
-Proyecto: Observatorio de Conflictos Laborales — Santa Fe / Entre Ríos
-Colaboración técnica: GPT-5 (OpenAI, 2025)
+---
+📖 **Créditos**
+Autor: *Camila Barreto*
+Proyecto: Observatorio de Conflictos Laborales — Entre Ríos / Santa Fe
+Colaboración técnica: GPT-5.2 (OpenAI, 2025)
 
