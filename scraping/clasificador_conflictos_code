@@ -1,0 +1,147 @@
+# clasificador_conflictos.py — Versión 2.0
+# Clasificación + actualización incremental sin duplicados
+
+import pandas as pd
+from pathlib import Path
+import json
+
+DATA_PATH = Path("data")
+
+archivos_fuente = [
+    DATA_PATH / "historico_entrerios.csv",
+    DATA_PATH / "historico_santafe.csv",
+    DATA_PATH / "historico_nacionales.csv",
+]
+
+salida = DATA_PATH / "conflictos_clasificados.csv"
+
+# ------------------------------
+# DICCIONARIOS
+# ------------------------------
+TIPOS_CONFLICTO = {
+    "Reivindicativo": [
+        "reclamo", "paritaria", "aumento", "salario", "recomposición",
+        "revisión salarial", "condiciones de trabajo", "mejora", "incremento", "reapertura"
+    ],
+    "Defensivo": [
+        "despido", "cierre", "suspensión", "crisis", "ajuste", "recorte",
+        "procedimiento preventivo de crisis", "reducción", "lockout"
+    ],
+    "Institucional": [
+        "ministerio", "gobierno", "intendencia", "gobernador", "paritaria provincial",
+        "secretaría", "municipio", "estado", "funcionario"
+    ],
+    "Político-solidario": [
+        "reforma laboral", "ajuste", "ley", "política", "solidaridad",
+        "reforma previsional", "protesta nacional"
+    ],
+}
+
+try:
+    with open("sectores.json", encoding="utf-8") as f:
+        SECTORES = json.load(f)
+except FileNotFoundError:
+    SECTORES = {
+        "educación": ["docente", "escuela", "universidad", "amafe", "amsafe"],
+        "salud": ["hospital", "médico", "enfermero", "profesionales de la salud"],
+        "transporte": ["colectivo", "chofer", "camionero", "transporte", "uta"],
+        "industria": ["fábrica", "metalúrgico", "planta", "obreros", "industrial"],
+        "estatales": ["ate", "upcn", "empleado público", "administración pública"],
+        "municipales": ["municipal", "intendencia", "empleados municipales"],
+        "bancarios": ["banco", "bancario", "la bancaria"],
+    }
+
+# ------------------------------
+# FUNCIONES DE CLASIFICACIÓN
+# ------------------------------
+def clasificar_tipo_conflicto(texto):
+    texto_lower = texto.lower()
+    for tipo, palabras in TIPOS_CONFLICTO.items():
+        if any(p in texto_lower for p in palabras):
+            return tipo
+    return "Indeterminado"
+
+def clasificar_sector(texto):
+    texto_lower = texto.lower()
+    for sector, terminos in SECTORES.items():
+        if any(t in texto_lower for t in terminos):
+            return sector
+    return "general"
+
+# ------------------------------
+# PROCESAMIENTO
+# ------------------------------
+def procesar_datasets():
+    df_total = []
+
+    for archivo in archivos_fuente:
+        if not archivo.exists():
+            print(f"⚠️ No se encontró {archivo}")
+            continue
+
+        df = pd.read_csv(archivo)
+        if df.empty:
+            continue
+
+        print(f"📄 Procesando {archivo.name} ({len(df)} filas)")
+
+        # Crear UID para evitar duplicados
+        df["uid"] = df.apply(
+            lambda x: hash((str(x.get("titulo", "")).lower().strip() + str(x.get("medio", "")).lower().strip())),
+            axis=1
+        )
+
+        df["tipo_conflicto"] = df["texto"].fillna("").apply(clasificar_tipo_conflicto)
+        df["sector"] = df["texto"].fillna("").apply(clasificar_sector)
+
+        df_total.append(df)
+
+    if not df_total:
+        print("⚠️ No hay datos para procesar.")
+        return
+
+    df_final = pd.concat(df_total, ignore_index=True)
+
+    # ------------------------------
+    # MERGE CON HISTÓRICO EXISTENTE
+    # ------------------------------
+    if salida.exists():
+        df_existente = pd.read_csv(salida)
+        if "uid" not in df_existente.columns:
+            df_existente["uid"] = df_existente.apply(
+                lambda x: hash((str(x.get("titulo", "")).lower().strip() + str(x.get("medio", "")).lower().strip())),
+                axis=1
+            )
+    else:
+        df_existente = pd.DataFrame(columns=df_final.columns)
+
+    # Combinar sin duplicar
+    uids_existentes = set(df_existente["uid"].tolist())
+    nuevos = df_final[~df_final["uid"].isin(uids_existentes)]
+
+    df_actualizado = pd.concat([df_existente, nuevos], ignore_index=True)
+
+    # ------------------------------
+    # GUARDAR Y RESUMIR
+    # ------------------------------
+    df_actualizado.to_csv(salida, index=False, encoding="utf-8-sig")
+
+    print(f"✅ Dataset actualizado: {len(nuevos)} nuevas noticias agregadas ({len(df_actualizado)} totales).")
+
+    # Estadísticas
+    resumen_tipo = df_actualizado["tipo_conflicto"].value_counts().reset_index()
+    resumen_tipo.columns = ["tipo_conflicto", "cantidad"]
+
+    resumen_sector = df_actualizado["sector"].value_counts().reset_index()
+    resumen_sector.columns = ["sector", "cantidad"]
+
+    print("\n=== Distribución por tipo de conflicto ===")
+    print(resumen_tipo.to_string(index=False))
+    print("\n=== Distribución por sector laboral ===")
+    print(resumen_sector.to_string(index=False))
+
+# ------------------------------
+# MAIN
+# ------------------------------
+if __name__ == "__main__":
+    procesar_datasets()
