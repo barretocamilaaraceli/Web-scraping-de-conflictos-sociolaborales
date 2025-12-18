@@ -38,7 +38,6 @@ El proceso se organiza en tres etapas:
 
 ## 📂 Estructura del repositorio
 📦 ConflictoER/
-│
 ├── 📁 data/ # Archivos CSV acumulativos
 │ ├── historico_santafe.csv
 │ ├── historico_entreríos.csv
@@ -50,27 +49,27 @@ El proceso se organiza en tres etapas:
 ├── 🧹 deduplicador.py # Script de limpieza de duplicados
 └── 🧾 README.md # Documentación del proyecto
 
-## ⚙️ Instalación y configuración
+---
 
-### 1️. Clonar el repositorio
+# ⚙️ Instalación y configuración
+
+## 1. Clonar el repositorio
 ```bash
 git clone https://github.com/<tu_usuario>/ConflictoER.git
 cd ConflictoER
 
----
-### 2. Crear un entorno virtual (opcional) 
+## 2. Crear un entorno virtual (opcional)
 python -m venv venv
 source venv/bin/activate      # Linux/macOS
 venv\Scripts\activate         # Windows
 
-##. 3. Instalar dependencias
+## 3. Instalar dependencias
 pip install requests beautifulsoup4 feedparser pandas rapidfuzz
 
 ----
-🚀 Ejecución paso a paso
-1️⃣ Relevar noticias
+**🚀 Ejecución paso a paso**
+### 1️⃣ Relevar noticias
 python scraping_er_sf.py
-
 
 📥 Este script:
 Extrae noticias de medios locales y nacionales.
@@ -83,7 +82,7 @@ data/historico_santafe.csv
 data/historico_entreríos.csv
 data/historico_nacionales.csv
 
-2️⃣ Eliminar duplicados
+### 2️⃣ Eliminar duplicados
 python deduplicador.py
 
 🧹 Este script:
@@ -92,7 +91,7 @@ Elimina duplicados exactos y por similitud (>90%).
 Devuelve una base consolidada y limpia:
 data/conflictos_limpios.csv
 
-3️⃣ Clasificar los conflictos
+### 3️⃣ Clasificar los conflictos
 python clasificador_conflictos.py
 
 🧠 Este script:
@@ -105,7 +104,7 @@ subnivel_conflicto (opcional: bajo / medio / alto)
 Salida:
 data/conflictos_clasificados.csv
 
-📊 Campos del dataset final
+# 📊 Campos del dataset final
 Campo	Descripción
 fecha_relevamiento	Fecha del scraping
 medio	Fuente periodística
@@ -125,8 +124,8 @@ categoria_conflicto	Clasificación temática (docente, salud, etc.)
 subnivel_conflicto	Bajo / Medio / Alto (según puntaje)
 longitud_texto	Longitud del texto analizado
 
-🗞️ Medios relevados
-🟦 Entre Ríos
+##🗞️ Medios relevados
+###🟦 Entre Ríos
 Análisis Digital
 El Miércoles Digital
 El Heraldo de Concordia (RSS)
@@ -135,7 +134,7 @@ La Calle (Concepción del Uruguay)
 AIM Digital
 APF Digital
 
-🟥 Santa Fe
+###🟥 Santa Fe
 Aire de Santa Fe
 Santa Fe Noticias
 Pausa (Santa Fe)
@@ -143,12 +142,12 @@ Diario Castellanos (Rafaela)
 Esperanza Día x Día
 Reconquista Hoy
 
-⚪ Nacionales (con cobertura regional)
+###⚪ Nacionales (con cobertura regional)
 InfoGremiales
 La Izquierda Diario (Entre Ríos)
 La Izquierda Diario (Santa Fe)
 
-🧩 Flujo de trabajo completo
+##🧩 Flujo de trabajo completo
 scraping_er_sf.py      → Recolección y filtrado semántico
 deduplicador.py        → Limpieza de duplicados
 clasificador_conflictos.py → Clasificación temática por sector
@@ -156,14 +155,14 @@ clasificador_conflictos.py → Clasificación temática por sector
 Resultado final:
 data/conflictos_clasificados.csv
 
-🧰 Posibles mejoras futuras
+###🧰 Posibles mejoras futuras**
 Incorporar embeddings o modelos de clasificación supervisada (BERT, DistilBERT, SBERT).
 Analizar frecuencia temporal y territorial de conflictos (dashboards).
 Detección automática de gremios y empresas involucradas.
 Enlace con datasets comparativos: Mass Mobilization (Harvard) o ACEP (Nieto, UNMdP).
 Agregar capa de visualización (Streamlit / Power BI).
 
-📖 Créditos
+##📖 Créditos**
 Autor: Camila Barreto
 Proyecto: Observatorio de Conflictos Laborales — Santa Fe / Entre Ríos
 Colaboración técnica: GPT-5 (OpenAI, 2025)
