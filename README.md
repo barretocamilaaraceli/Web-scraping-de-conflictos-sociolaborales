@@ -35,8 +35,9 @@ El proceso se organiza en tres etapas:
    - Permite incorporar reglas o modelos NLP más complejos en futuras versiones.
 
 ---
+```bash
+📂 Estructura del repositorio
 
-## 📂 Estructura del repositorio
 📦 ConflictoER/
 ├── 📁 data/ # Archivos CSV acumulativos
 │ ├── historico_santafe.csv
@@ -49,29 +50,34 @@ El proceso se organiza en tres etapas:
 ├── 🧹 deduplicador.py # Script de limpieza de duplicados
 └── 🧾 README.md # Documentación del proyecto
 
-
+```
 ---
 
 # ⚙️ Instalación y configuración
 
 ## 1. Clonar el repositorio
+```bash
 git clone https://github.com/<tu_usuario>/ConflictoER.git
 cd ConflictoER
+```
 
 ## **2. Crear un entorno virtual (opcional)**
+```bash
 python -m venv venv
 source venv/bin/activate      # Linux/macOS
 venv\Scripts\activate         # Windows
+```
 
 ## **3. Instalar dependencias**
-*pip install requests beautifulsoup4 feedparser pandas rapidfuzz*
-
+```bash
+pip install requests beautifulsoup4 feedparser pandas rapidfuzz
+```
 ----
 
 # **🚀 Ejecución paso a paso**
 
 ## 1️⃣ Relevar noticias
-python scraping_er_sf.py
+*python scraping_er_sf.py*
 
 📥 Este script:
 Extrae noticias de medios locales y nacionales.
@@ -86,7 +92,7 @@ data/historico_nacionales.csv
 
 
 ## 2️⃣ Eliminar duplicados
-python deduplicador.py
+*python deduplicador.py*
 
 🧹 Este script:
 Combina los CSV anteriores.
@@ -97,7 +103,7 @@ data/conflictos_limpios.csv
 
 
 ## **3️⃣ Clasificar los conflictos**
-python clasificador_conflictos.py
+*python clasificador_conflictos.py*
 
 *🧠 Este script:*
 Clasifica los conflictos por tipo de sector laboral.
@@ -111,29 +117,31 @@ data/conflictos_clasificados.csv
 
 ---
 
-## **📊 Campos del dataset final**
-**Campo**	               **Descripción**
-fecha_relevamiento	      Fecha del scraping
-medio	                     Fuente periodística
-titulo	                  Título original
-link	                     URL del artículo
-texto	                     Cuerpo de la noticia
-territorio	               Santa Fe / Entre Ríos
-acciones_detectadas	      Palabras clave de acción
-actores_detectados	      Palabras clave de actor
-reclamos_detectados	      Palabras clave de reclamo
-verbos_detectados	         Verbos asociados a conflictos
-repertorios_detectados	   Formas de acción colectiva
-instituciones_detectadas	Menciones a organismos
-nivel_conflicto	         Valor 0–1 según coocurrencias
-coocurrencia	            Estructura A:B:C detectada
-categoria_conflicto       	Clasificación temática (docente, salud, etc.)
-subnivel_conflicto	      Bajo / Medio / Alto (según puntaje)
-longitud_texto	            Longitud del texto analizado
+```bash
+📊 Campos del dataset final
+
+**Campo**	             	 │  **Descripción**
+fecha_relevamiento	     	 │  Fecha del scraping
+medio	                 	 │  Fuente periodística
+titulo	                 	 │  Título original
+link	                 	 │  URL del artículo
+texto	                  	 │  Cuerpo de la noticia
+territorio	              	 │  Santa Fe / Entre Ríos
+acciones_detectadas	         │  Palabras clave de acción
+actores_detectados           │  Palabras clave de actor
+reclamos_detectados	      	 │  Palabras clave de reclamo
+verbos_detectados	         │  Verbos asociados a conflictos
+repertorios_detectados	     │  Formas de acción colectiva
+instituciones_detectadas	 │  Menciones a organismos
+nivel_conflicto	             │  Valor 0–1 según coocurrencias
+coocurrencia	             │  Estructura A:B:C detectada
+categoria_conflicto          │	Clasificación temática (docente, salud, etc.)
+subnivel_conflicto	         │  Bajo / Medio / Alto (según puntaje)
+longitud_texto	             │  Longitud del texto analizado
 
 ---
-
-## **🗞️ Medios relevados**
+	
+🗞️ Medios relevados
 
 *🟦 Entre Ríos*
 Análisis Digital
@@ -159,17 +167,19 @@ La Izquierda Diario (Santa Fe)
 
 ---
 
-# **🧩 Flujo de trabajo completo**
+🧩 Flujo de trabajo completo
+
 *scraping_er_sf.py*           → Recolección y filtrado semántico
 *deduplicador.py*             → Limpieza de duplicados
 *clasificador_conflictos.py*  → Clasificación temática por sector
 
-**Resultado final:**
+*Resultado final:*
 data/conflictos_clasificados.csv
 
+```
 ---
 
-**🧰 Posibles mejoras futuras**
+## **🧰 Posibles mejoras futuras**
 Incorporar embeddings o modelos de clasificación supervisada (BERT, DistilBERT, SBERT).
 Analizar frecuencia temporal y territorial de conflictos (dashboards).
 Detección automática de gremios y empresas involucradas.
@@ -177,8 +187,8 @@ Enlace con datasets comparativos: Mass Mobilization (Harvard) o ACEP (Nieto, UNM
 Agregar capa de visualización (Streamlit / Power BI).
 
 ---
-📖 **Créditos**
-Autor: *Camila Barreto*
-Proyecto: Observatorio de Conflictos Laborales — Entre Ríos / Santa Fe
+## 📖 **Créditos**
+Autor: *Camila Barreto*  │
+Proyecto: Observatorio de Conflictos Laborales — Entre Ríos / Santa Fe  │
 Colaboración técnica: GPT-5.2 (OpenAI, 2025)
 
