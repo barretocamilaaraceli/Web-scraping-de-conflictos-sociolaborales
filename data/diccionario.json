@@ -1,0 +1,105 @@
+```bash
+  
+{
+    "titulo": "Conflictos Laborales - Diccionario de Términos",
+    "idioma": "es",
+    "version": "1.0",
+    "fecha": "2025-12-16",
+    "autor": "GitHub Copilot",
+	
+  "acciones": [
+    "paro", "huelga", "reclamo", "protesta", "movilización", "manifestación",
+    "asamblea", "plan de lucha", "cese de actividades", "toma", "piquete",
+    "acampe", "corte de ruta", "paralización", "lockout", "boicot",
+    "paro total", "paro parcial", "paro por tiempo indeterminado", "cese laboral",
+    "retención de tareas", "quite de colaboración", "medida de fuerza",
+    "paro sorpresivo", "huelga general", "corte de calle", "paro escalonado",
+    "asamblea permanente", "estado de alerta", "paro provincial", "protestan",
+    "reclaman", "resolvieron medidas", "resolvió medidas"
+  ],
+
+  "actores": [
+    "trabajadores", "trabajador", "trabajadoras", "obreros", "obreras",
+    "empleados", "empleadas", "docentes", "estatales", "municipales",
+    "gremio", "gremial", "sindicato", "sindical", "delegados", "comisión interna",
+    "delegadas", "personal", "asalariados", "choferes", "colectiveros",
+    "salud pública", "profesionales de la salud", "enfermeros", "médicos",
+    "metalúrgicos", "textiles", "obreros rurales", "trabajadores rurales",
+    "construcción", "UOCRA", "UOM", "CGT", "CTA", "ATE", "UPCN", "AMSAFE",
+    "AGMER", "Sadop", "Amsafe", "docentes privados", "bancarios", "judiciales", "Camioneros", "UTEDYC", "Sutep", "APINTA", "trabajadores del estado",
+    "judiciales", "Camioneros", "UTEDYC", "Sutep", "APINTA", "trabajadores del estado", "INTA",
+    "trabajadores de la educación", "trabajadores de la administración pública",
+    "trabajadores municipales", "trabajadores docentes", "trabajadores de la salud",
+    "sindicato de trabajadores", "sindicato docente", "sindicato municipal",
+    "sindicato de camioneros", "delegación gremial", "plenario gremial"
+  ],
+
+  "reclamos": [
+    "salario", "salarios", "recomposición salarial", "aumento salarial",
+    "acuerdo salarial", "paritarias", "negociación paritaria", "reapertura de paritarias",
+    "revisión salarial", "condiciones laborales", "condiciones de trabajo",
+    "reforma laboral", "ajuste", "recorte", "presupuesto", "despidos", "suspensiones", "reincorporaciones", "despedidos",
+    "estatización", "nacionalización", "externalización", "tercerización",
+    "pase a planta", "pase a planta permanente", "regularización laboral",
+    "precarización", "precarizados", "cierre de planta", "reducción salarial",
+    "atraso salarial", "incumplimiento salarial", "atraso en los pagos",
+    "reivindicación", "procedimiento preventivo de crisis", "ppc",
+    "renegociación", "conflicto salarial", "malestar docente", "malestar obrero", "jornada de trabajo",
+    "reincorporación", "recategorización", "contratados", "paritaria provincial",
+    "paritaria nacional", "reclamo gremial", "acuerdo colectivo", "convenio colectivo"
+  ],
+
+  "repertorios": [
+    "paro", "huelga", "marcha", "movilización", "piquete", "corte", "toma",
+    "ocupación", "boicot", "concentración", "protesta frente a", "reunión sindical",
+    "conferencia de prensa", "paro docente", "paro de trabajadores", "asamblea general", "Asamblea",
+    "cese de actividades", "cese laboral", "interrupción de tareas", "comunicado", "comunicado gremial","paro general", "paro provincial", "asamblea docente", "paro total",
+    "paro de actividades", "paro de transporte", "paro bancario", "paro municipal",
+    "paro estatal", "paro por tiempo indeterminado", "paro parcial", "corte de ruta", "piquetes", "piquete", "escrache"
+  ],
+
+  "verbos_conflicto": [
+  "reclaman", "protestan", "denuncian", "exigen", 
+  "movilizan", "paran", "interrumpen", "cortan", 
+  "bloquean", "se manifestaron", "convocaron", 
+  "toman", "ocupan", "realizan asamblea"
+],
+
+  "instituciones": [
+    "ministerio de trabajo", "gobierno provincial", "gobernación",
+    "casa de gobierno", "intendencia", "intendencia municipal", "municipio","intendente",
+    "concejo deliberante", "cámara empresaria", "empresa", "empresario", "patronal",
+    "autoridades", "ministerio de educación", "ministerio de economía",
+    "ministerio de salud", "gobierno nacional", "secretaría de trabajo",
+    "ministerio de producción", "ministerio de desarrollo social",
+    "ministerio de infraestructura", "ministerio de transporte", "sede sindical", "sindicato", "gobernador", "Frigerio", "Pullaro"
+  ],
+
+  "territorios": {
+    "santafe": [
+      "santa fe", "santo tomé", "rafaela", "esperanza", "recreo", "laguna paiva",
+      "san justo", "coronda", "san carlos centro", "gobernador crespo",
+      "helvecia", "monte vera", "progreso", "reconquista", "avellaneda",
+      "sauce viejo", "las toscas", "venado tuerto", "firmat", "cañada rosquín",
+      "sunchales", "suardi", "san javier", "vera", "tostado", "malabrigo", "santa fe capital"
+    ],
+    "entrerios": [
+      "paraná", "concordia", "concepción del uruguay", "gualeguaychú",
+      "nogoyá", "victoria", "villaguay", "federal", "chajarí", "colón",
+      "la paz", "diamante", "gualeguay", "basavilbaso", "san salvador",
+      "rosario del tala", "islas del ibicuy", "ceibas", "uruguay", "departamento uruguay", "federacion", "oro verde"
+    ]
+  },
+
+  "exclusiones": [
+    "rosario", "gran rosario", "puerto general san martín",
+    "baigorria", "funes",
+    "buenos aires", "ciudad autónoma de buenos aires", 
+    "caba", "conurbano bonaerense", "la plata", "avellaneda (buenos aires)",
+    "lanús", "quilmes", "lomas de zamora", "morón", "san isidro", "san justo",
+    "mar del plata", "bahía blanca", "cordoba", "mendoza", "neuquén", "salta",
+    "tucumán", "bariloche", "santiago del estero", "formosa", "chile", "brasil", "bolivia", "paraguay", "perú", "armado", "narco", "narcotráfico", "narcotraficante", "narcomenudeo", "droga", "Drogas", "drogas", "drogadicto", "drogadictos", "consumo de drogas", "tráfico de drogas", "tráfico ilegal", "ilegales", "policiales", "barra", "barras", "delincuencia", "delincuentes", "delincuente", "asaltante", "asaltantes",
+    "nacional", "internacional", "asalto", "robos", "robo", "asesinato", "homicidio", "homicidios",
+    "accidente", "accidentes", "tránsito", "vial", "choque", "colisión", "auto", "automóvil", "moto", "motocicleta", "camioneta", "camión"
+  ]
+}
