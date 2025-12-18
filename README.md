@@ -179,6 +179,24 @@ data/conflictos_clasificados.csv
 ```
 ---
 
+## ⚠️ Nota importante sobre el scraping de medios 
+
+El funcionamiento correcto de los scripts de scraping depende directamente de la **estructura HTML de cada sitio web** (etiquetas, clases, identificadores, jerarquía del DOM). Dado que **cada medio utiliza un diseño distinto** —y que estos pueden modificarse con el tiempo—, es necesario **verificar previamente la estructura de las páginas** antes de ejecutar o adaptar el código.
+Si un medio cambia su maquetación (por ejemplo, los nombres de las clases CSS o la forma en que se renderiza el contenido), el script puede dejar de capturar correctamente títulos, fechas o cuerpos de texto.
+
+### Recomendación práctica
+Ante fallas o al incorporar nuevos medios:
+1. Abrir una noticia del medio en el navegador.
+2. Inspeccionar el HTML (clic derecho → *Inspeccionar*).
+3. Copiar los fragmentos relevantes del código (contenedores de título, fecha y texto).
+4. Compartir esa estructura con una herramienta de asistencia (por ejemplo, ChatGPT) para identificar con mayor precisión:
+   - etiquetas (`div`, `article`, `h1`, `p`, etc.),
+   - clases o identificadores,
+   - y los selectores adecuados a utilizar en el scraping.
+Esta verificación previa permite **ajustar los selectores del script** y garantizar una extracción de datos consistente y reproducible.
+
+---
+
 ## **🧰 Posibles mejoras futuras**
 Incorporar embeddings o modelos de clasificación supervisada (BERT, DistilBERT, SBERT).
 Analizar frecuencia temporal y territorial de conflictos (dashboards).
