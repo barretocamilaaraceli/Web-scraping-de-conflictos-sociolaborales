@@ -1,0 +1,290 @@
+# scrapingersf.py — v3.0: coocurrencias inteligentes + medios nacionales
+import requests
+from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
+import pandas as pd
+import json
+from time import sleep
+from pathlib import Path
+from datetime import datetime
+import feedparser
+import warnings
+
+warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+# ==========================
+# CONFIGURACIÓN
+# ==========================
+ruta_diccionario = Path("diccionario.json")
+if not ruta_diccionario.exists():
+    raise FileNotFoundError("⚠️ No se encontró diccionario.json")
+
+with open(ruta_diccionario, encoding="utf-8") as f:
+    DIC = json.load(f)
+
+KEY_ACCIONES = DIC.get("acciones", [])
+KEY_ACTORES = DIC.get("actores", [])
+KEY_RECLAMOS = DIC.get("reclamos", [])
+KEY_VERBOS = DIC.get("verbos_conflicto", [])
+KEY_REPERTORIOS = DIC.get("repertorios", [])
+KEY_INST = DIC.get("instituciones", [])
+TERRITORIOS = DIC.get("territorios", {})
+KEY_EXCL = DIC.get("exclusiones", [])
+
+HEADERS = {"User-Agent": "Mozilla/5.0"}
+DATA_PATH = Path("data")
+DATA_PATH.mkdir(exist_ok=True)
+
+# ==========================
+# FUNCIONES AUXILIARES
+# ==========================
+def detectar_territorio(texto):
+    texto_lower = texto.lower()
+    for prov, lugares in TERRITORIOS.items():
+        for lugar in lugares:
+            if lugar in texto_lower:
+                return prov.capitalize()
+    return "no identificado"
+
+def extraer_texto(link):
+    try:
+        r = requests.get(link, headers=HEADERS, timeout=10)
+        soup = BeautifulSoup(r.text, "html.parser")
+        parrafos = soup.find_all("p")
+        texto = " ".join(p.get_text(strip=True) for p in parrafos if p.get_text(strip=True))
+        return texto[:5000]
+    except Exception:
+        return ""
+
+def es_conflicto_laboral(texto, medio):
+    """Evalúa si el texto cumple coocurrencias laborales válidas (A1–A4)."""
+    texto_lower = texto.lower()
+
+    # Exclusiones temáticas o geográficas
+    if any(ex in texto_lower for ex in KEY_EXCL):
+        return None
+
+    acciones = [a for a in KEY_ACCIONES if a in texto_lower]
+    actores = [b for b in KEY_ACTORES if b in texto_lower]
+    reclamos = [c for c in KEY_RECLAMOS if c in texto_lower]
+    verbos = [v for v in KEY_VERBOS if v in texto_lower]
+    repertorios = [r for r in KEY_REPERTORIOS if r in texto_lower]
+    instituciones = [i for i in KEY_INST if i in texto_lower]
+    territorio = detectar_territorio(texto_lower)
+
+    # Inferencia territorial según medio si no detecta
+    if territorio == "no identificado":
+        if "santa fe" in medio.lower():
+            territorio = "Santa Fe"
+        elif "ríos" in medio.lower() or "entrerios" in medio.lower():
+            territorio = "Entre Ríos"
+
+    # Sin actores → no es conflicto laboral
+    if not actores:
+        return None
+
+    tipo_conflicto = None
+    score = 0.0
+
+    # (A1) Fuerte: Actor + Acción + (Verbo o Repertorio)
+    if actores and acciones and (verbos or repertorios):
+        tipo_conflicto = "A1"
+        score = 1.0
+    # (A2) Media: Actor + Reclamo + Territorio
+    elif actores and reclamos and territorio != "no identificado":
+        tipo_conflicto = "A2"
+        score = 0.75
+    # (A3) Institucional: Actor + Institución + Acción
+    elif actores and instituciones and acciones:
+        tipo_conflicto = "A3"
+        score = 0.6
+    # (A4) Territorial: Actor + Acción + Territorio
+    elif actores and acciones and territorio != "no identificado":
+        tipo_conflicto = "A4"
+        score = 0.5
+    else:
+        return None
+
+    return {
+        "acciones": acciones,
+        "actores": actores,
+        "reclamos": reclamos,
+        "verbos": verbos,
+        "repertorios": repertorios,
+        "instituciones": instituciones,
+        "territorio": territorio,
+        "nivel_conflicto": round(score, 2),
+        "tipo_coocurrencia": tipo_conflicto,
+    }
+
+# ==========================
+# EXTRACCIÓN DE NOTICIAS
+# ==========================
+def extraer_noticias(url, medio, tag="article", clase=None):
+    print(f"📰 Relevando {medio}...")
+    noticias = []
+
+    try:
+        # RSS
+        if any(x in url for x in [".xml", "rss", "feed"]):
+            feed = feedparser.parse(url)
+            if not feed.entries:
+                print(f"⚠️ Feed vacío o inaccesible en {medio}.")
+                return []
+
+            for entry in feed.entries:
+                titulo = entry.title
+                link = entry.link
+                cuerpo = extraer_texto(link)
+                texto_completo = (titulo + " " + cuerpo).lower()
+
+                cooc = es_conflicto_laboral(texto_completo, medio)
+                if not cooc:
+                    continue
+
+                noticias.append({
+                    "fecha_relevamiento": datetime.now().strftime("%Y-%m-%d"),
+                    "medio": medio,
+                    "titulo": titulo,
+                    "link": link,
+                    "texto": cuerpo,
+                    "territorio": cooc["territorio"],
+                    "acciones_detectadas": ", ".join(cooc["acciones"]),
+                    "actores_detectados": ", ".join(cooc["actores"]),
+                    "reclamos_detectados": ", ".join(cooc["reclamos"]),
+                    "verbos_detectados": ", ".join(cooc["verbos"]),
+                    "repertorios_detectados": ", ".join(cooc["repertorios"]),
+                    "instituciones_detectadas": ", ".join(cooc["instituciones"]),
+                    "nivel_conflicto": cooc["nivel_conflicto"],
+                    "tipo_coocurrencia": cooc["tipo_coocurrencia"],
+                    "origen_fuente": "RSS",
+                    "longitud_texto": len(cuerpo)
+                })
+
+            print(f"✅ {len(noticias)} noticias encontradas en {medio} (RSS).")
+            return noticias
+
+        # HTML
+        r = requests.get(url, headers=HEADERS, timeout=10)
+        soup = BeautifulSoup(r.text, "html.parser")
+        elementos = soup.find_all(tag, class_=clase) if clase else soup.find_all(tag)
+        if not elementos:
+            elementos = soup.find_all(["h1", "h2", "h3"], class_=lambda c: c and ("title" in c or "entry-title" in c))
+        if not elementos:
+            elementos = [a.parent for a in soup.find_all("a") if len(a.get_text(strip=True)) > 30]
+
+        for e in elementos:
+            a = e.find("a") if e.name != "a" else e
+            if not a:
+                continue
+            titulo = a.get_text(strip=True)
+            link = a.get("href", "")
+            if not link or not titulo:
+                continue
+            if not link.startswith("http"):
+                link = url.rstrip("/") + "/" + link.lstrip("/")
+
+            cuerpo = extraer_texto(link)
+            texto_completo = (titulo + " " + cuerpo).lower()
+
+            cooc = es_conflicto_laboral(texto_completo, medio)
+            if not cooc:
+                continue
+
+            noticias.append({
+                "fecha_relevamiento": datetime.now().strftime("%Y-%m-%d"),
+                "medio": medio,
+                "titulo": titulo,
+                "link": link,
+                "texto": cuerpo,
+                "territorio": cooc["territorio"],
+                "acciones_detectadas": ", ".join(cooc["acciones"]),
+                "actores_detectados": ", ".join(cooc["actores"]),
+                "reclamos_detectados": ", ".join(cooc["reclamos"]),
+                "verbos_detectados": ", ".join(cooc["verbos"]),
+                "repertorios_detectados": ", ".join(cooc["repertorios"]),
+                "instituciones_detectadas": ", ".join(cooc["instituciones"]),
+                "nivel_conflicto": cooc["nivel_conflicto"],
+                "tipo_coocurrencia": cooc["tipo_coocurrencia"],
+                "origen_fuente": "HTML",
+                "longitud_texto": len(cuerpo)
+            })
+
+    except Exception as e:
+        print(f"⚠️ Error en {medio}: {e}")
+
+    print(f"✅ {len(noticias)} noticias encontradas en {medio}.")
+    return noticias
+
+# ==========================
+# MEDIOS
+# ==========================
+MEDIOS_ENTRERIOS = [
+    {"nombre": "Análisis Digital", "url": "https://analisisdigital.com.ar/", "tag": "h3", "class": "title"},
+    {"nombre": "El Miércoles Digital", "url": "https://www.elmiercolesdigital.com.ar/", "tag": "h2", "class": "post-title entry-title"},
+    {"nombre": "El Heraldo de Concordia", "url": "https://elheraldoapiv3.eleco.com.ar/feed-notes", "tag": "rss", "class": None},
+    {"nombre": "El Día de Gualeguaychú", "url": "https://eldiaapiv3.eleco.com.ar/feed-notes", "tag": "rss", "class": None},
+    {"nombre": "La Calle (Concepción del Uruguay)", "url": "https://lacalle.com.ar/", "tag": "h3", "class": "entry-title"},
+    {"nombre": "AIM Digital", "url": "https://www.aimdigital.com.ar/", "tag": "h2", "class": "post-title entry-title"},
+    {"nombre": "APF Digital", "url": "https://www.apfdigital.com.ar/", "tag": "h3", "class": "title"}
+]
+
+MEDIOS_SANTAFE = [
+    {"nombre": "Aire de Santa Fe", "url": "https://www.airedesantafe.com.ar/", "tag": "h2", "class": "title"},
+    {"nombre": "Santa Fe Noticias", "url": "https://www.santafenoticias.com.ar/", "tag": "h3", "class": "entry-title"},
+    {"nombre": "Pausa (Santa Fe)", "url": "https://www.pausa.com.ar/", "tag": "h2", "class": "post-title entry-title"},
+    {"nombre": "Diario Castellanos (Rafaela)", "url": "https://diariocastellanos.net/", "tag": "h2", "class": "entry-title"},
+    {"nombre": "Esperanza Día x Día", "url": "https://www.esperanzadiaxdia.com.ar/", "tag": "h2", "class": "entry-title"},
+    {"nombre": "Reconquista Hoy", "url": "https://www.reconquistahoy.com/", "tag": "h2", "class": "titulo"}
+]
+
+MEDIOS_NACIONALES = [
+    {"nombre": "InfoGremiales", "url": "https://www.infogremiales.com.ar/", "tag": "h2", "class": "entry-title"},
+    {"nombre": "La Izquierda Diario (Entre Ríos)", "url": "https://www.laizquierdadiario.com/Entre-Rios", "tag": "h2", "class": "entry-title"},
+    {"nombre": "La Izquierda Diario (Santa Fe)", "url": "https://www.laizquierdadiario.com/Seccion-Santa-Fe", "tag": "h2", "class": "entry-title"},
+]
+
+# ==========================
+# GUARDADO ACUMULATIVO
+# ==========================
+def guardar_datos(df_nuevos, provincia):
+    archivo = DATA_PATH / f"historico_{provincia.lower().replace(' ', '')}.csv"
+
+    if df_nuevos.empty:
+        print(f"📁 No hay nuevas noticias para {provincia}.\n")
+        return
+
+    if archivo.exists():
+        try:
+            df_existente = pd.read_csv(archivo)
+        except pd.errors.EmptyDataError:
+            df_existente = pd.DataFrame(columns=df_nuevos.columns)
+        titulos_existentes = set(df_existente["titulo"].tolist())
+        df_nuevos = df_nuevos[~df_nuevos["titulo"].isin(titulos_existentes)]
+        df_final = pd.concat([df_existente, df_nuevos], ignore_index=True)
+    else:
+        df_final = df_nuevos
+
+    df_final.to_csv(archivo, index=False, encoding="utf-8-sig")
+    print(f"📁 Archivo actualizado: {archivo} ({len(df_nuevos)} nuevas noticias)\n")
+
+# ==========================
+# EJECUCIÓN
+# ==========================
+def relevar_medios(medios, provincia):
+    todas = []
+    for medio in medios:
+        data = extraer_noticias(medio["url"], medio["nombre"], medio["tag"], medio["class"])
+        todas.extend(data)
+        sleep(1)
+    df = pd.DataFrame(todas)
+    guardar_datos(df, provincia)
+
+def main():
+    print("=== Relevando conflictos laborales (v3.0: coocurrencias inteligentes + medios nacionales) ===\n")
+    relevar_medios(MEDIOS_ENTRERIOS, "Entre Ríos")
+    relevar_medios(MEDIOS_SANTAFE, "Santa Fe")
+    relevar_medios(MEDIOS_NACIONALES, "Nacionales")
+    print("🏁 Relevamiento completado.\n")
+
+if __name__ == "__main__":
+    main()
