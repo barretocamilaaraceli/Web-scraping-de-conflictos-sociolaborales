@@ -54,7 +54,6 @@ El proceso se organiza en tres etapas:
 # ⚙️ Instalación y configuración
 
 ## 1. Clonar el repositorio
-```bash
 git clone https://github.com/<tu_usuario>/ConflictoER.git
 cd ConflictoER
 
