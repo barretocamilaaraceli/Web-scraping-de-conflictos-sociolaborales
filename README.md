@@ -58,12 +58,12 @@ El proceso se organiza en tres etapas:
 git clone https://github.com/<tu_usuario>/ConflictoER.git
 cd ConflictoER
 
-## 2. Crear un entorno virtual (opcional)
+## **2. Crear un entorno virtual (opcional)**
 python -m venv venv
 source venv/bin/activate      # Linux/macOS
 venv\Scripts\activate         # Windows
 
-## 3. Instalar dependencias
+## **3. Instalar dependencias**
 pip install requests beautifulsoup4 feedparser pandas rapidfuzz
 
 ----
@@ -91,7 +91,7 @@ Elimina duplicados exactos y por similitud (>90%).
 Devuelve una base consolidada y limpia:
 data/conflictos_limpios.csv
 
-### 3️⃣ Clasificar los conflictos
+### **3️⃣ Clasificar los conflictos**
 python clasificador_conflictos.py
 
 🧠 Este script:
@@ -104,7 +104,7 @@ subnivel_conflicto (opcional: bajo / medio / alto)
 Salida:
 data/conflictos_clasificados.csv
 
-# 📊 Campos del dataset final
+## **📊 Campos del dataset final**
 Campo	Descripción
 fecha_relevamiento	Fecha del scraping
 medio	Fuente periodística
@@ -124,7 +124,7 @@ categoria_conflicto	Clasificación temática (docente, salud, etc.)
 subnivel_conflicto	Bajo / Medio / Alto (según puntaje)
 longitud_texto	Longitud del texto analizado
 
-##🗞️ Medios relevados
+## **🗞️ Medios relevados**
 ###🟦 Entre Ríos
 Análisis Digital
 El Miércoles Digital
@@ -147,7 +147,7 @@ InfoGremiales
 La Izquierda Diario (Entre Ríos)
 La Izquierda Diario (Santa Fe)
 
-##🧩 Flujo de trabajo completo
+##**🧩 Flujo de trabajo completo**
 scraping_er_sf.py      → Recolección y filtrado semántico
 deduplicador.py        → Limpieza de duplicados
 clasificador_conflictos.py → Clasificación temática por sector
@@ -155,14 +155,14 @@ clasificador_conflictos.py → Clasificación temática por sector
 Resultado final:
 data/conflictos_clasificados.csv
 
-###🧰 Posibles mejoras futuras**
+###**🧰 Posibles mejoras futuras**
 Incorporar embeddings o modelos de clasificación supervisada (BERT, DistilBERT, SBERT).
 Analizar frecuencia temporal y territorial de conflictos (dashboards).
 Detección automática de gremios y empresas involucradas.
 Enlace con datasets comparativos: Mass Mobilization (Harvard) o ACEP (Nieto, UNMdP).
 Agregar capa de visualización (Streamlit / Power BI).
 
-##📖 Créditos**
+##📖 **Créditos**
 Autor: Camila Barreto
 Proyecto: Observatorio de Conflictos Laborales — Santa Fe / Entre Ríos
 Colaboración técnica: GPT-5 (OpenAI, 2025)
