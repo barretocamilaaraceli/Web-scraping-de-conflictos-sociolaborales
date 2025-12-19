@@ -27,3 +27,9 @@ dependencies:
   - pip
   - pip:
       - google-search-results==2.4.2
+
+
+🚀 Cómo usarlo
+conda env create -f environment.yml
+conda activate conflictoer
+python scrapingersf_historico_api.py
