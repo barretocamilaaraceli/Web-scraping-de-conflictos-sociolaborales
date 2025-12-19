@@ -1,0 +1,154 @@
+# scrapingersf_historico_api.py — versión SerpApi para Google News histórico
+from serpapi import GoogleSearch
+from datetime import datetime
+import pandas as pd
+from pathlib import Path
+from time import sleep
+from random import uniform
+import dateparser
+
+# Importamos tus funciones base
+from scraping_er_sf import es_conflicto_laboral, extraer_texto
+
+# ==========================
+# CONFIGURACIÓN
+# ==========================
+API_KEY = "34df2b08a002b917f58d371231d109ab20df135d34461bfa821db43b6b960116"  # 🔑 <-- pegá acá tu clave de SerpApi
+
+START_DATE = "12/10/2023"   # mm/dd/yyyy
+END_DATE   = "12/10/2025"
+
+PROVINCIAS = ["Santa Fe", "Entre Ríos"]
+KEYWORDS = [
+    "conflicto laboral", "paro", "reclamo salarial", "trabajadores", "trabajadoras", "asamblea", "sindicato", "sindical",
+    "huelga", "protesta sindical", "paritaria", "gremio", "negociación colectiva", "despidos", "ajuste", "reforma laboral", "AGMER", "Granja Tres Arroyos", "ATE", "UPCN", "ATE Entre Ríos", "ATE Santa Fe", "UPCN Entre Ríos", "UPCN Santa Fe", "municipales"
+]
+
+DATA_PATH = Path("data")
+DATA_PATH.mkdir(exist_ok=True)
+ARCHIVO_HISTORICO = DATA_PATH / "relevamiento_conflictos_historicos_milei.csv"
+
+
+# ==========================
+# FUNCIONES AUXILIARES
+# ==========================
+def normalizar_fecha(fecha_str: str) -> str:
+    """Convierte fechas como 'hace 3 días' o '12 de mayo de 2024'."""
+    if not fecha_str:
+        return "no disponible"
+
+    fecha = dateparser.parse(
+        fecha_str,
+        languages=["es", "en"],
+        settings={
+            "PREFER_DAY_OF_MONTH": "first",
+            "RELATIVE_BASE": datetime.now(),
+            "PREFER_DATES_FROM": "past"
+        }
+    )
+
+    return fecha.strftime("%Y-%m-%d") if fecha else "no disponible"
+
+
+
+def buscar_serpapi(keyword, provincia):
+    """Busca noticias en Google News vía SerpApi."""
+    print(f"🔎 Buscando '{keyword}' en {provincia}...")
+    resultados = []
+
+    params = {
+        "engine": "google_news",
+        "q": f"{keyword} {provincia}",
+        "api_key": API_KEY,
+        "tbs": f"cdr:1,cd_min:{START_DATE},cd_max:{END_DATE}",
+        "hl": "es"
+    }
+
+    search = GoogleSearch(params)
+    results = search.get_dict()
+
+    news_results = results.get("news_results", [])
+    if not news_results:
+        print(f"⚠️ Sin resultados para {provincia} / {keyword}")
+        return []
+
+    for item in news_results:
+        titulo = item.get("title", "")
+        link = item.get("link", "")
+        fecha_raw = item.get("date", "")
+        medio = item.get("source", {}).get("name", "Google News")
+
+        cuerpo = extraer_texto(link)
+        texto_completo = (titulo + " " + cuerpo).lower()
+
+        cooc = es_conflicto_laboral(texto_completo, provincia)
+        if not cooc:
+            continue
+
+        resultados.append({
+            "fecha_relevamiento": datetime.now().strftime("%Y-%m-%d"),
+            "fecha_publicacion": normalizar_fecha(fecha_raw),
+            "provincia": provincia,
+            "medio": medio,
+            "titulo": titulo,
+            "link": link,
+            "texto": cuerpo[:2000],
+            "territorio": cooc["territorio"],
+            "acciones_detectadas": ", ".join(cooc["acciones"]),
+            "actores_detectados": ", ".join(cooc["actores"]),
+            "reclamos_detectados": ", ".join(cooc["reclamos"]),
+            "verbos_detectados": ", ".join(cooc["verbos"]),
+            "repertorios_detectados": ", ".join(cooc["repertorios"]),
+            "instituciones_detectadas": ", ".join(cooc["instituciones"]),
+            "nivel_conflicto": cooc["nivel_conflicto"],
+            "tipo_coocurrencia": cooc["tipo_coocurrencia"],
+            "origen_fuente": "Google News (SerpApi)",
+            "longitud_texto": len(cuerpo)
+        })
+        sleep(uniform(1.0, 2.5))
+
+    print(f"✅ {len(resultados)} noticias procesadas para {provincia} con '{keyword}'")
+    return resultados
+
+
+def guardar_acumulativo(df_nuevos):
+    """Guarda los resultados en el CSV histórico acumulativo."""
+    if df_nuevos.empty:
+        print("📁 No hay nuevas noticias para agregar.\n")
+        return
+
+    if ARCHIVO_HISTORICO.exists():
+        try:
+            df_existente = pd.read_csv(ARCHIVO_HISTORICO)
+        except pd.errors.EmptyDataError:
+            df_existente = pd.DataFrame(columns=df_nuevos.columns)
+        titulos_existentes = set(df_existente["titulo"].tolist())
+        df_filtrado = df_nuevos[~df_nuevos["titulo"].isin(titulos_existentes)]
+        df_final = pd.concat([df_existente, df_filtrado], ignore_index=True)
+    else:
+        df_final = df_nuevos
+
+    df_final.to_csv(ARCHIVO_HISTORICO, index=False, encoding="utf-8-sig")
+    print(f"📦 Archivo actualizado: {ARCHIVO_HISTORICO} ({len(df_nuevos)} nuevas noticias)\n")
+
+
+# ==========================
+# EJECUCIÓN PRINCIPAL
+# ==========================
+def main():
+    print("=== Relevamiento histórico de conflictos laborales (SerpApi) — período Milei ===\n")
+    todas = []
+
+    for prov in PROVINCIAS:
+        for kw in KEYWORDS:
+            resultados = buscar_serpapi(kw, prov)
+            todas.extend(resultados)
+            sleep(uniform(2, 4))
+
+    df = pd.DataFrame(todas)
+    guardar_acumulativo(df)
+    print("🏁 Relevamiento histórico completado y guardado.\n")
+
+
+if __name__ == "__main__":
+    main()
