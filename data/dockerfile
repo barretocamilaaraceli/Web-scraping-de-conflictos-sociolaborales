@@ -33,3 +33,12 @@ ENV SERPAPI_KEY="TU_API_KEY_AQUI"
 
 # Comando por defecto al iniciar el contenedor
 CMD ["python", "scrapingersf_historico_api.py"]
+
+---
+🚀 Cómo usarlo
+
+# Construir imagen
+docker build -t conflictoer:latest .
+
+# Ejecutar el scraper
+docker run -it --rm -e SERPAPI_KEY="tu_api_key_aqui" conflictoer:latest
