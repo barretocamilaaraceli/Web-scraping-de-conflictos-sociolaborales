@@ -1,0 +1,127 @@
+  📰 Relevamiento Histórico de Conflictos Laborales (2023–2025)
+Proyecto de monitoreo automatizado de noticias laborales en Santa Fe y Entre Ríos durante el primer período presidencial de Javier Milei (2023-2025).
+Integra scraping semántico, detección de coocurrencias laborales y clasificación territorial.
+
+📘 Descripción general
+Este sistema realiza un relevamiento automatizado de noticias históricas relacionadas con conflictos laborales, huelgas, reclamos salariales y paritarias entre el 10 de diciembre de 2023 y el 10 de diciembre de 2025, concentrándose en:
+
+🧭 Provincias: Entre Ríos y Santa Fe
+
+📰 Fuentes: buscador Google News (vía SerpApi) y medios locales/nacionales
+
+El script aplica un análisis de texto para detectar coocurrencias laborales válidas (A1–A4) en base a un diccionario temático (diccionario.json) con listas de actores, reclamos, acciones, instituciones y repertorios de protesta.
+
+ConflictoER/
+│
+├── scraping_er_sf.py                                  # Script principal: scraping actual (día a día)
+├── scrapingersf_historico_api.py                      # Versión histórica vía SerpApi
+├── diccionario.json                                   # Diccionario de palabras clave laborales
+├── data/
+│   └── relevamiento_conflictos_historicos_milei.csv   # Archivo acumulativo
+└── README.md                                          # Este archivo
+
+⚙️ Requisitos
+📦 Dependencias de Python
+
+Instalar una vez con:
+pip install google-search-results beautifulsoup4 requests pandas dateparser
+
+🌐 API Key de SerpApi
+Crear una cuenta gratuita en https://serpapi.com
+Copiar tu API Key (tiene 100 búsquedas gratuitas por mes)
+Pegarla en el archivo scraping_er_sf_historico_api.py:
+API_KEY = "TU_API_KEY_AQUI"
+
+🚀 Ejecución
+Desde la terminal o VS Code:
+python scrapingersf_historico_api.py
+
+🕒 El script recorrerá automáticamente las provincias y palabras clave definidas, como: conflicto laboral, paro, reclamo salarial, huelga, protesta sindical, paritaria, gremio, etc.
+
+Los resultados se guardan incrementalmente en:
+data/relevamiento_conflictos_historicos_milei.csv
+
+🧠 Qué hace el script
+- Consulta Google News mediante la API de SerpApi con rango de fechas: 10/12/2023 → 10/12/2025
+- Obtiene noticias con título, fuente, fecha y snippet.
+- Extrae el texto completo del artículo (extraer_texto()).
+- Evalúa coocurrencias laborales (es_conflicto_laboral()), clasificando:
+    A1: Actor + Acción + Verbo/Repertorio
+    A2: Actor + Reclamo + Territorio
+    A3: Actor + Institución + Acción
+    A4: Actor + Acción + Territorio
+- Guarda las noticias válidas en el CSV acumulativo con columnas:
+| fecha_relevamiento | fecha_publicacion | provincia | medio | titulo | link | texto | acciones_detectadas | actores_detectados | reclamos_detectados | ... |
+
+🧱 Lógica de actualización
+
+Cada vez que se ejecuta:
+- Compara los títulos con el CSV previo.
+- Evita duplicados.
+- Agrega solo las nuevas noticias encontradas.
+
+Si ocurre un error de red o conexión con SerpApi, el script continúa con la siguiente búsqueda.
+
+*🔒 Manejo de errores y tolerancia a fallos*
+El código incluye bloqueos try/except para manejar:
+
+  🔌 Desconexiones temporales (ConnectionError, NameResolutionError)
+
+  🚫 Límites de API (espera y reintenta después de unos segundos)
+
+  ⚠️ Campos vacíos (fecha o cuerpo de noticia ausente → “no disponible”)
+
+  Si un término falla (por ejemplo “sindicato”), el script lo salta y sigue con el siguiente keyword.
+
+🧭 Estructura de datos de salida (CSV)
+Cada fila corresponde a una noticia válida:
+
+Campo	                                                          Descripción
+fecha_relevamiento	                                            Día en que se ejecutó el script
+fecha_publicacion_raw	                                          Fecha textual original (“hace 2 días”, “5 jul 2024”)
+fecha_publicacion	                                              Fecha normalizada YYYY-MM-DD
+provincia	                                                      Santa Fe / Entre Ríos
+medio	                                                          Fuente original de la noticia
+titulo	                                                        Título del artículo
+link	                                                          Enlace al artículo completo
+texto	                                                          Texto del cuerpo o snippet
+territorio	                                                    Provincia o localidad detectada
+acciones_detectadas	                                            Palabras clave de acción laboral
+actores_detectados	                                            Sindicatos, gremios, etc.
+reclamos_detectados	                                            Motivos del conflicto
+verbos_detectados	                                              Verbos asociados a protesta/conflicto
+repertorios_detectados	                                        Formas de protesta
+instituciones_detectadas	                                      Entidades mencionadas
+nivel_conflicto	                                                Ponderación (0.5–1.0)
+tipo_coocurrencia	                                              A1–A4 según fuerza del conflicto
+origen_fuente	                                                  Google News (SerpApi)
+longitud_texto	                                                Número de caracteres del cuerpo
+
+🔎 Ejemplo de salida
+fecha_relevamiento,fecha_publicacion_raw,fecha_publicacion,provincia,medio,titulo,link,territorio,acciones_detectadas,actores_detectados,...
+2025-12-19,hace 3 días,2025-12-16,Santa Fe,Aire de Santa Fe,"Docentes de Amsafe realizan paro provincial",https://...,Santa Fe,paro,Amsafe,salarial,...
+
+🧰 Solución de problemas comunes
+Problema	                                  Causa	                                              Solución
+⚠️ “Sin resultados visibles”	              Google bloquea el scraping directo	                Usar SerpApi (ya integrado)
+⚠️ NameResolutionError	                    DNS no resolvió serpapi.com	                        Reintentar / cambiar DNS (8.8.8.8)
+⚠️ DeprecationWarning (dateparser)	        Fecha sin año	                                      Ya corregido con settings
+❌ Token inesperado en PowerShell	          Comillas mal cerradas	                              Usar & "C:\Program Files\Python314\python.exe" "C:\Users\...py"
+📭 CSV vacío	                              No se detectaron coocurrencias laborales	          Revisar diccionario.json o keywords
+
+💡 Extensiones futuras
+🧩 Integrar Selenium como fallback si SerpApi falla.
+📅 Agregar una columna de diferencia de días entre publicación y relevamiento.
+🗂️ Implementar almacenamiento en SQLite o DuckDB para consultas históricas.
+📊 Dashboard en Streamlit para visualizar conflictos por mes/provincia.
+
+✨ Autoría
+Proyecto: Relevamiento histórico de conflictos laborales — Argentina (2023–2025)
+Desarrollo: Python 3.10+ / SerpApi / BeautifulSoup / pandas / dateparser
+Autor: Camila Barreto
+Licencia: Uso académico / investigación social
+
+
+
+
+
