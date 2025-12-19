@@ -1,0 +1,35 @@
+🐳 2️⃣ Dockerfile
+(para ejecutar el scraper en cualquier máquina, sin configurar nada)
+Con este archivo podés construir una imagen Docker que corre tu script automáticamente.
+
+Guarda como Dockerfile en la raíz del proyecto 👇
+# Imagen base de Python
+FROM python:3.10-slim
+
+# Metadatos
+LABEL maintainer="Tu Nombre <tu.email@ejemplo.com>"
+LABEL description="Scraper histórico de conflictos laborales (2023–2025)"
+
+# Crear directorio de trabajo
+WORKDIR /app
+
+# Copiar archivos del proyecto
+COPY . /app
+
+# Instalar dependencias del sistema (para lxml y bs4)
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libxml2-dev \
+    libxslt1-dev \
+    zlib1g-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar dependencias de Python
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Variable de entorno (opcional para tu API key)
+ENV SERPAPI_KEY="TU_API_KEY_AQUI"
+
+# Comando por defecto al iniciar el contenedor
+CMD ["python", "scrapingersf_historico_api.py"]
