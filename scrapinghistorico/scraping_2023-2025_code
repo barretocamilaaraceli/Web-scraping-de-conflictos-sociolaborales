@@ -13,7 +13,7 @@ from scraping_er_sf import es_conflicto_laboral, extraer_texto
 # ==========================
 # CONFIGURACIÓN
 # ==========================
-API_KEY = "34df2b08a002b917f58d371231d109ab20df135d34461bfa821db43b6b960116"  # 🔑 <-- pegá acá tu clave de SerpApi
+API_KEY = "TU_CLAVE_API"  # 🔑 <-- pegá acá tu clave de SerpApi
 
 START_DATE = "12/10/2023"   # mm/dd/yyyy
 END_DATE   = "12/10/2025"
