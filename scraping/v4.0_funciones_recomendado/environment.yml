@@ -1,0 +1,44 @@
+name: conflictos_py311
+channels:
+  - defaults
+  - conda-forge
+
+dependencies:
+  # 🔹 Versión de Python compatible con spaCy
+  - python=3.11
+
+  # 🔹 Librerías base
+  - pip
+  - numpy=1.26.4
+  - pandas>=2.2.0
+  - dateparser=1.2.0
+
+  # 🔹 Librerías NLP
+  - spacy=3.7.4
+  - pip:
+      # Modelo de spaCy en español (descarga automática)
+      - https://github.com/explosion/spacy-models/releases/download/es_core_news_md-3.7.0/es_core_news_md-3.7.0.tar.gz
+
+  # 🔹 Limpieza y similitud textual
+  - rapidfuzz=3.10.1
+
+  # 🔹 Web scraping y parsing
+  - requests
+  - beautifulsoup4
+  - feedparser
+
+  # 🔹 API y búsqueda avanzada
+  - google-search-results
+
+  # 🔹 Utilidades extra
+  - tqdm
+  - pathlib
+  - warnings
+
+  # 🔹 Exportación y compatibilidad
+  - openpyxl
+
+  # 🔹 Canal de instalación pip complementario
+  - pip:
+      - setuptools
+      - wheel
