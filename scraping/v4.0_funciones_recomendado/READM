@@ -1,0 +1,235 @@
+🧾 README.md
+ACLARACIÓN: Para complejizar la clasificación, se utiliza spaCy y necesita la versión Python 3.11. Para este caso, como suelo utilizar Python 3.14 y es el que tengo activo, cree un environment en Conda para utilizar la v. 3.11.
+# 🧠 Clasificador de Conflictos Laborales — Entre Ríos y Santa Fe
+
+Este proyecto realiza la **extracción, limpieza, análisis y clasificación semántica** de noticias sobre **conflictos laborales** en las provincias de **Entre Ríos** y **Santa Fe (Argentina)**.  
+Integra procesamiento de lenguaje natural (NLP) con **spaCy**, detección territorial inteligente, y un flujo reproducible mediante **entornos Conda**.
+
+> Versión: **4.0 — Integración spaCy y compatibilidad Conda**  
+> Última actualización: Diciembre 2025
+
+---
+
+## 🎯 Objetivo general
+Relevar noticias de medios locales y nacionales y clasificarlas según:
+- Tipo de conflicto laboral (reivindicativo, defensivo, institucional, político-solidario, etc.)  
+- Sector involucrado (educación, salud, transporte, industria, estatales, etc.)  
+- Localización territorial (provincia, localidad, nivel institucional)
+- Coocurrencia de actores, reclamos, acciones y repertorios de conflicto.
+
+---
+
+## 🧠 Enfoque metodológico
+
+El sistema combina **enfoque de reglas** (diccionarios temáticos) con **procesamiento de lenguaje natural**:
+
+| Etapa | Descripción | Tecnología |
+|--------|-------------|-------------|
+| 🔍 Extracción | Scraping de portales y feeds RSS (Entre Ríos y Santa Fe) | `BeautifulSoup`, `feedparser` |
+| 🧹 Limpieza | Unificación y deduplicación por similitud textual | `rapidfuzz`, `pandas` |
+| 🧾 Clasificación | Detección de tipo de conflicto y sector | Reglas + diccionarios JSON |
+| 🧭 Territorio | Inferencia territorial (por medio y texto) | spaCy NER + reglas |
+| 🧠 NLP semántico | Reconocimiento de actores, lugares, instituciones | `spaCy` (modelo `es_core_news_md`) |
+
+---
+
+## 🧩 Novedades v4.0
+
+| Módulo | Mejora implementada |
+|---------|---------------------|
+| 🧠 **spaCy** | Incorporación de análisis semántico, reconocimiento de entidades (lugares, instituciones, actores). |
+| 🌎 **Territorial** | Nueva clasificación por provincia y localidad, con inferencia automática. |
+| 🧰 **Entorno Conda** | Entorno `conflictos_py311` con Python 3.11 (ya que Python 3.14 no es compatible con spaCy). |
+| 🧼 **Deduplicación** | Limpieza avanzada con RapidFuzz, priorizando noticias más recientes o completas. |
+| 🧾 **Diccionarios extendidos** | Ampliación de léxico para cada tipo de conflicto y sector laboral. |
+
+---
+
+## ⚠️ Requisitos previos
+
+### 🧱 1. Instalar [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+Durante la instalación:
+- ✅ Seleccionar “Add Miniconda to PATH”
+- ✅ Seleccionar “Register Miniconda as my default Python”
+
+Esto permite crear entornos independientes (sin conflicto con Python 3.14 o versiones globales).
+
+---
+
+## 🧰 Configuración del entorno
+
+### 1️⃣ Crear entorno Conda
+
+```bash
+conda create -n conflictos_py311 python=3.11
+conda activate conflictos_py311
+
+
+🧠 Se usa Python 3.11 porque spaCy no es compatible con Python 3.14 (error de thinc y numpy_ops).
+
+2️⃣ Instalar dependencias
+pip install --upgrade pip
+pip install pandas numpy==1.26.4 spacy==3.7.4 rapidfuzz==3.10.1 dateparser==1.2.0
+pip install google-search-results feedparser beautifulsoup4 requests
+
+3️⃣ Instalar el modelo de spaCy en español
+python -m spacy download es_core_news_md
+
+
+⚠️ Si este comando arroja error 404, instalar manualmente:
+
+pip install https://github.com/explosion/spacy-models/releases/download/es_core_news_md-3.7.0/es_core_news_md-3.7.0.tar.gz
+
+4️⃣ Verificar instalación
+python -m spacy validate
+
+
+Si todo está correcto, verás:
+
+✔ Loaded pipeline 'es_core_news_md'
+✔ spaCy installation successful
+
+🧭 Configuración en VS Code
+
+Abrir el proyecto:
+C:\Users\camil\OneDrive\Desktop\ConflictoER
+
+Instalar la extensión Python (by Microsoft)
+
+Seleccionar intérprete:
+En la barra inferior →
+conda (conflictos_py311)
+o manualmente:
+C:\Users\camil\miniconda3\envs\conflictos_py311\python.exe
+
+(Opcional pero recomendado)
+Crear el archivo .vscode/settings.json:
+
+{
+    "python.defaultInterpreterPath": "C:\\Users\\camil\\miniconda3\\envs\\conflictos_py311\\python.exe",
+    "python.analysis.extraPaths": [
+        "C:\\Users\\camil\\miniconda3\\envs\\conflictos_py311\\Lib\\site-packages"
+    ],
+    "python.terminal.activateEnvironment": true
+}
+
+
+Con esto, VS Code recordará automáticamente el entorno correcto.
+
+🚀 Ejecución del proyecto
+1️⃣ Activar entorno
+conda activate conflictos_py311
+
+2️⃣ Ir a la carpeta del proyecto
+cd "C:\Users\camil\OneDrive\Desktop\ConflictoER"
+
+3️⃣ Ejecutar scripts
+🔹 Scraping histórico / actual
+python scrapingersf.py
+
+🔹 Deduplicación
+python deduplicador.py
+
+🔹 Clasificación
+python clasificador_conflictos.py
+
+📂 Estructura del proyecto
+ConflictoER/
+│
+├── data/
+│   ├── Bases de datos originales/
+│   │   ├── historico_entrerios.csv
+│   │   ├── historico_santafe.csv
+│   │   ├── historico_nacionales.csv
+│   │   └── conflictos_limpios.csv
+│   └── conflictos_clasificados.csv
+│
+├── clasificador_conflictos.py
+├── deduplicador.py
+├── scrapingersf.py
+├── setup_env_spacy.bat
+├── install_requirements.bat
+├── run_clasificador.bat
+└── README.md
+
+⚙️ Scripts auxiliares
+Script	Función
+setup_env_spacy.bat	Crea el entorno Conda conflictos_py311, instala spaCy y dependencias.
+install_requirements.bat	Instala librerías necesarias dentro del entorno activo.
+deduplicador.py	Elimina duplicados exactos y similares en CSV de medios.
+clasificador_conflictos.py	Clasifica por tipo, sector y territorio (con spaCy).
+scrapingersf.py	Releva medios de ER y SF (y nacionales).
+run_clasificador.bat	Ejecuta el clasificador automáticamente con entorno correcto.
+🧠 Funcionalidades principales
+🗞️ Extracción de noticias
+
+Recolecta artículos de medios locales y nacionales mediante scraping o RSS.
+
+Guarda títulos, cuerpos, fechas, y fuentes en CSV.
+
+🧹 Limpieza y deduplicación
+
+Identifica duplicados por UID (título + medio).
+
+Usa similitud difusa (RapidFuzz) para detectar duplicados semánticos.
+
+Combina datasets históricos.
+
+🧩 Clasificación
+
+Aplica reglas temáticas:
+Reivindicativo, Defensivo, Institucional, Político-solidario.
+
+Detecta sectores laborales (educación, salud, transporte, industria, etc.).
+
+Determina el territorio según texto y medio (Santa Fe / Entre Ríos).
+
+Etiqueta noticias con actores, acciones y reclamos.
+
+🧠 Procesamiento semántico (spaCy)
+
+Reconoce entidades geográficas y organizacionales.
+
+Permite refinar la clasificación territorial y contextual.
+
+Facilita el análisis posterior de actores y conflictos.
+
+💬 Errores comunes y soluciones
+Error	Causa	Solución
+ImportError: DLL load failed while importing numpy_ops	spaCy no soporta Python 3.14	Usar Conda con Python 3.11
+Import "spacy" could not be resolved	VS Code no usa el entorno correcto	Seleccionar conflictos_py311 como intérprete
+No module named 'pandas'	Dependencias no instaladas	Ejecutar install_requirements.bat
+404 while downloading es_core_news_md	Error de URL spaCy	Instalar modelo manualmente desde GitHub
+🌎 Portabilidad y replicación
+
+Podés exportar el entorno para compartir o reproducirlo:
+
+conda env export > environment.yml
+
+
+Y recrearlo en otro equipo con:
+
+conda env create -f environment.yml
+conda activate conflictos_py311
+
+🔬 Tecnologías
+Herramienta	Versión	Uso
+Python	3.11	Lenguaje principal
+spaCy	3.7.4	Procesamiento NLP
+pandas	2.2+	Manejo de datos
+rapidfuzz	3.10+	Similitud textual
+numpy	1.26	Cálculos base
+BeautifulSoup4	4.12	Scraping
+feedparser	6.0	RSS
+dateparser	1.2	Fechas naturales
+SerpAPI (opcional)	—	Noticias históricas
+📜 Licencia
+
+----
+Este proyecto es de uso libre con atribución.
+Creado con fines académicos y de investigación sobre conflictos laborales.
+
+Desarrollado por:
+🧍‍♀️ Camila Barreto
+
+Asistencia técnica: GPT-5 (Python + NLP)
